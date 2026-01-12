@@ -33,7 +33,7 @@ module.exports = {
         target: "http://web",
         proxyReq: [
             function (proxyReq) {
-                proxyReq.setHeader('Host', '{{ .Hostname }}');
+                proxyReq.setHeader('Host', process.env.DDEV_HOSTNAME);
                 proxyReq.setHeader('X-Forwarded-Proto', 'https');
                 proxyReq.setHeader('X-Forwarded-Port', '443');
             }
