@@ -102,5 +102,12 @@ function init_grunt_themes() {
 
     local selected_count=$(echo "${selected_themes}" | wc -w)
     echo -e "\n${txtgrn}✓ Added ${selected_count} theme(s) to ${THEMES_CONFIG_FILE}${txtrst}"
+
+    # Ensure npm packages are installed
+    ensure_npm_packages
+    if [[ $? -ne 0 ]]; then
+        exit 1
+    fi
+
     echo -e "${txtgrn}✓ Run: ddev grunt watch${txtrst}\n"
 }

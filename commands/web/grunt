@@ -18,123 +18,8 @@ source ".ddev/commands/web/components/variables"
 source ".ddev/commands/web/components/functions"
 source ".ddev/commands/web/components/themes"
 source ".ddev/commands/web/components/init"
+source ".ddev/commands/web/components/watch"
 source ".ddev/commands/web/components/help"
-
-REQUIRED_PACKAGES=(
-    "grunt"
-    "grunt-browser-sync"
-    "grunt-contrib-clean"
-    "grunt-contrib-cssmin"
-    "grunt-contrib-imagemin"
-    "grunt-contrib-jasmine"
-    "grunt-contrib-less"
-    "grunt-contrib-watch"
-    "grunt-eslint"
-    "grunt-exec"
-    "grunt-replace"
-    "grunt-styledocco"
-    "grunt-template-jasmine-requirejs"
-    "grunt-text-replace"
-    "load-grunt-config"
-    "time-grunt"
-    "underscore"
-    "browser-sync"
-)
-
-function ensure_npm_packages() {
-    local pkg_file="package.json"
-
-    if [[ ! -f "${pkg_file}" ]]; then
-        echo -e "\n${txtcyn}Creating package.json with Grunt and BrowserSync packages...${txtrst}"
-        cat > "${pkg_file}" << 'PKGEOF'
-{
-  "devDependencies": {
-    "grunt": "~1.6.1",
-    "grunt-browser-sync": "~2.2.0",
-    "grunt-contrib-clean": "~2.0.1",
-    "grunt-contrib-cssmin": "~5.0.0",
-    "grunt-contrib-imagemin": "~4.0.0",
-    "grunt-contrib-jasmine": "~4.0.0",
-    "grunt-contrib-less": "~3.0.0",
-    "grunt-contrib-watch": "~1.1.0",
-    "grunt-eslint": "~24.3.0",
-    "grunt-exec": "~3.0.0",
-    "grunt-replace": "~2.0.2",
-    "grunt-styledocco": "~0.3.0",
-    "grunt-template-jasmine-requirejs": "~0.2.3",
-    "grunt-text-replace": "~0.4.0",
-    "load-grunt-config": "~4.0.1",
-    "time-grunt": "~2.0.0",
-    "underscore": "1.13.7",
-    "browser-sync": "~3.0.3"
-  }
-}
-PKGEOF
-        echo -e "${txtgrn}✓ Created package.json${txtrst}"
-    else
-        local missing_packages=()
-
-        for pkg in "${REQUIRED_PACKAGES[@]}"; do
-            if ! grep -q "\"${pkg}\"" "${pkg_file}"; then
-                missing_packages+=("${pkg}")
-            fi
-        done
-
-        if [[ ${#missing_packages[@]} -gt 0 ]]; then
-            echo -e "\n${txtcyn}Adding missing packages to package.json...${txtrst}"
-            local temp_file=$(mktemp)
-
-            # Add missing packages using node if available, otherwise just note them
-            if command -v node &> /dev/null; then
-                node -e "
-                    const fs = require('fs');
-                    const pkg = JSON.parse(fs.readFileSync('${pkg_file}', 'utf8'));
-                    const deps = ${REQUIRED_PACKAGES[@].map(p => ({name: p})).map(d => d.name)};
-                    const versions = {
-                        'grunt': '~1.6.1',
-                        'grunt-browser-sync': '~2.2.0',
-                        'grunt-contrib-clean': '~2.0.1',
-                        'grunt-contrib-cssmin': '~5.0.0',
-                        'grunt-contrib-imagemin': '~4.0.0',
-                        'grunt-contrib-jasmine': '~4.0.0',
-                        'grunt-contrib-less': '~3.0.0',
-                        'grunt-contrib-watch': '~1.1.0',
-                        'grunt-eslint': '~24.3.0',
-                        'grunt-exec': '~3.0.0',
-                        'grunt-replace': '~2.0.2',
-                        'grunt-styledocco': '~0.3.0',
-                        'grunt-template-jasmine-requirejs': '~0.2.3',
-                        'grunt-text-replace': '~0.4.0',
-                        'load-grunt-config': '~4.0.1',
-                        'time-grunt': '~2.0.0',
-                        'underscore': '1.13.7',
-                        'browser-sync': '~3.0.3'
-                    };
-                    if (!pkg.devDependencies) pkg.devDependencies = {};
-                    const missing = ${missing_packages[@].join(' ').split(' ').filter(p => p)};
-                    missing.forEach(p => {
-                        if (!pkg.devDependencies[p]) {
-                            pkg.devDependencies[p] = versions[p] || 'latest';
-                            console.log('Adding: ' + p);
-                        }
-                    });
-                    fs.writeFileSync('${pkg_file}', JSON.stringify(pkg, null, 2) + '\n');
-                "
-            else
-                echo -e "${txtylw}Missing packages: ${missing_packages[*]}${txtrst}"
-            fi
-        fi
-    fi
-
-    echo -e "${txtcyn}Installing npm packages...${txtrst}"
-    if npm install; then
-        echo -e "${txtgrn}✓ npm packages installed successfully${txtrst}"
-    else
-        echo -e "${txtred}✗ Failed to install npm packages${txtrst}"
-        return 1
-    fi
-    return 0
-}
 
 echo -e "${bldblu}DDEV Grunt/BrowserSync for Magento ${txtrst}"
 
@@ -146,15 +31,7 @@ case "$1" in
         list_themes_in_config
         ;;
     watch)
-        ensure_npm_packages
-        if [[ $? -ne 0 ]]; then
-            exit 1
-        fi
-        echo "Proxying Browsersync on $(echo ${DDEV_PRIMARY_URL} | sed -E 's/:[0-9]+//'):3000"
-        browser-sync start -c /var/www/html/.ddev/browser-sync.cjs & BROWSERSYNC_PID=$!
-        grunt --gruntfile /var/www/html/.ddev/grunt/Gruntfile.js watch & WATCH_PID=$!
-        trap "kill $BROWSERSYNC_PID $WATCH_PID 2>/dev/null" EXIT
-        wait
+        run_grunt_watch
         ;;
     help|-h|--help)
         show_help
