@@ -12,8 +12,7 @@ Ddev addon for Magento 2 development with Grunt and BrowserSync live reload.
 ## Installation
 
 ```bash
-ddev addon authorize
-ddev get wexo/mcemballage/ddev-grunt-browsersync
+ddev get Tekrus/magento2-watcher
 ddev restart
 ```
 

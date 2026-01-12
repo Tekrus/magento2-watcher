@@ -17,11 +17,6 @@ project_files:
 ddev_version_constraint: '>= v1.23.4'
 
 pre_install_actions:
-  - |
-    #ddev-description:Install gum for interactive theme selection
-    if ! command -v gum &>/dev/null; then
-      mkdir -p /etc/apt/keyrings
-      curl -fsSL https://repo.charm.sh/apt/gpg.key 2>/dev/null | gpg --dearmor -o /etc/apt/keyrings/charm.gpg || true
-      echo "deb [signed-by=/etc/apt/keyrings/charm.gpg] https://repo.charm.sh/apt/ * *" 2>/dev/null | tee /etc/apt/sources.list.d/charm.list || true
-      apt-get update -qq 2>/dev/null && apt-get install -y -qq gum 2>/dev/null || true
-    fi
+    # https://github.com/Morgy93/ddev-gum
+    - if ! ddev add-on get --installed | grep -q "OpenForgeProject/ddev-gum"; then ddev add-on get OpenForgeProject/ddev-gum; fi
+    - "if [ -f .ddev/commands/web/woodoo_components/checks ]; then rm .ddev/commands/web/woodoo_components/checks && echo 'Woodoo Housekeeping: removed old file .ddev/commands/web/woodoo_components/checks'; fi"
