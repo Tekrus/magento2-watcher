@@ -101,7 +101,7 @@ missing.forEach(p => {
 fs.writeFileSync(pkgFile, JSON.stringify(pkg, null, 2) + '\n');
 NODEEOF
 
-            local missing_json=$(printf '%s\n' "${missing_packages[@]}" | jq -r .)
+            local missing_json=$(printf '%s\n' "${missing_packages[@]}" | jq -R . | jq -s .)
             node "${temp_script}" "${pkg_file}" "${missing_json}"
             rm -f "${temp_script}"
         fi
