@@ -7,9 +7,10 @@
 ## ExecRaw: true
 
 echo "Proxying Browsersync on $(echo ${DDEV_PRIMARY_URL} | sed -E 's/:[0-9]+//'):3000"
-npx browser-sync start -c /var/www/html/.ddev/browser-sync.cjs & BROWSERSYNC_PID=$!
 
-grunt watch & WATCH_PID=$!
+cd /var/www/html && npx browser-sync start -c /var/www/html/.ddev/browser-sync.cjs & BROWSERSYNC_PID=$!
+
+cd /var/www/html && npx grunt watch & WATCH_PID=$!
 
 trap "kill $BROWSERSYNC_PID $WATCH_PID 2>/dev/null" EXIT
 
