@@ -1,0 +1,35 @@
+#!/bin/bash
+#ddev-generated - Do not modify this file; your modifications will be overwritten.
+
+function show_help() {
+    echo -e "
+${bldblu}DDEV Grunt/BrowserSync for Magento${txtrst}
+
+${txtgrn}Usage:${txtrst}
+  ddev grunt ${txtcyn}[command]${txtrst}
+
+${txtgrn}Commands:${txtrst}
+  ${txtcyn}init, install, i${txtrst}    Initialize themes from database (interactive)
+  ${txtcyn}themes, theme${txtrst}       List configured themes
+  ${txtcyn}help, -h, --help${txtrst}    Show this help message
+
+${txtgrn}Examples:${txtrst}
+  ddev grunt init              # Select themes interactively
+  ddev grunt themes            # List configured themes
+  ddev browsersync             # Start BrowserSync and Grunt watch
+
+${txtgrn}First Time Setup:${txtrst}
+  1. ddev restart
+  2. ddev grunt init
+  3. ddev exec npm install
+  4. ddev exec grunt themes
+  5. ddev browsersync
+
+${txtgrn}Files:${txtrst}
+  .ddev/grunt-local-themes.js  # Theme configuration
+
+${txtgrn}Troubleshooting:${txtrst}
+  - Ensure Magento is installed and themes are registered
+  - Run: ddev exec php bin/magento cache:flush
+"
+}

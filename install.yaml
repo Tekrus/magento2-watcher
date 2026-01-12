@@ -1,6 +1,27 @@
 name: magento2-watcher
 
 project_files:
-  - docker-compose.magento2-watcher.yaml
+  - commands/web/browsersync
+  - commands/web/grunt
+  - commands/web/components/variables
+  - commands/web/components/functions
+  - commands/web/components/themes
+  - commands/web/components/init
+  - commands/web/components/help
+  - config.browsersync.yaml
+  - browser-sync.cjs
+  - Gruntfile.js
+  - grunt-local-themes.js
+  - grunt-config.json
 
-ddev_version_constraint: '>= v1.24.3'
+ddev_version_constraint: '>= v1.23.4'
+
+pre_install_actions:
+  - |
+    #ddev-description:Install gum for interactive theme selection
+    if ! command -v gum &>/dev/null; then
+      mkdir -p /etc/apt/keyrings
+      curl -fsSL https://repo.charm.sh/apt/gpg.key 2>/dev/null | gpg --dearmor -o /etc/apt/keyrings/charm.gpg || true
+      echo "deb [signed-by=/etc/apt/keyrings/charm.gpg] https://repo.charm.sh/apt/ * *" 2>/dev/null | tee /etc/apt/sources.list.d/charm.list || true
+      apt-get update -qq 2>/dev/null && apt-get install -y -qq gum 2>/dev/null || true
+    fi

@@ -1,0 +1,106 @@
+#!/bin/bash
+#ddev-generated - Do not modify this file; your modifications will be overwritten.
+
+# Initialize themes from database with interactive selection
+function init_grunt_themes() {
+    check_gum
+    check_mysql
+
+    local db_themes=$(get_themes_from_db)
+    local db_theme_count=$(echo "${db_themes}" | wc -w)
+
+    if [[ -z "${db_themes}" ]]; then
+        echo -e "\n${txtred}No themes found in Magento database.${txtrst}"
+        echo -e "${txtylw}Make sure Magento is installed and themes are registered.${txtrst}\n"
+        exit 1
+    fi
+
+    echo -en "\n${txtcyn}Found ${txtpur}${db_theme_count} themes${txtcyn} in your database.${txtrst}\n\n"
+
+    # Prepare gum choose options with already selected themes pre-selected
+    local existing_themes=$(get_existing_themes)
+    local select_args=""
+
+    for theme in ${db_themes}; do
+        if [[ "${existing_themes}" == *"${theme}"* ]]; then
+            select_args="${select_args} --selected ${theme}"
+        fi
+    done
+
+    local theme_options=$(echo "${db_themes}" | tr '\n' ' ')
+    local selected_themes=$(gum choose \
+        --cursor-prefix "[ ] " \
+        --unselected-prefix "[ ] " \
+        --selected-prefix "[✓] " \
+        ${select_args} \
+        --no-limit \
+        ${theme_options})
+
+    if [[ -z "${selected_themes}" ]]; then
+        echo -e "\n${txtylw}No themes selected.${txtrst}\n"
+        exit 0
+    fi
+
+    # Generate new config with selected themes
+    local config_content=""
+
+    for theme in ${selected_themes}; do
+        local existing_path=""
+        local existing_area="frontend"
+        local existing_locale="en_US"
+
+        # Try to get existing config
+        if theme_in_config "${theme}"; then
+            # Extract existing values from current config
+            existing_path=$(grep -A2 "'${theme}':" "${THEMES_CONFIG_FILE}" 2>/dev/null | grep -E "path:" | sed "s/.*path:.*'\([^']*\)'.*/\1/" || echo "")
+            existing_area=$(grep -A2 "'${theme}':" "${THEMES_CONFIG_FILE}" 2>/dev/null | grep -E "area:" | sed "s/.*area:.*'\([^']*\)'.*/\1/" || echo "frontend")
+            existing_locale=$(grep -A2 "'${theme}':" "${THEMES_CONFIG_FILE}" 2>/dev/null | grep -E "locale:" | sed "s/.*locale:.*'\([^']*\)'.*/\1/" || echo "en_US")
+        fi
+
+        # Ask for path if not existing
+        local theme_path
+        if [[ -n "${existing_path}" ]]; then
+            theme_path="${existing_path}"
+        else
+            theme_path=$(get_theme_path "${theme}")
+            if [[ -z "${theme_path}" ]]; then
+                theme_path="app/design/frontend/${theme}"
+            fi
+        fi
+
+        # Ask for locale
+        local theme_locale=$(gum input \
+            --cursor.foreground "#CCC" \
+            --prompt "Locale for ${theme}: " \
+            --prompt.foreground="#84CC16" \
+            --placeholder "en_US" \
+            --value "${existing_locale}")
+
+        if [[ -z "${theme_locale}" ]]; then
+            theme_locale="en_US"
+        fi
+
+        config_content="${config_content}
+    '${theme}': {
+        area: '${existing_area}',
+        name: '${theme}',
+        locale: '${theme_locale}',
+        files: [
+            'css/styles-m',
+            'css/styles-l'
+        ],
+        dsl: 'less'
+    },"
+    done
+
+    # Remove trailing comma
+    config_content=$(echo "${config_content}" | sed 's/,$//')
+
+    # Generate new config file
+    echo "Generating ${THEMES_CONFIG_FILE}..."
+    generate_grunt_config "${config_content}"
+
+    local selected_count=$(echo "${selected_themes}" | wc -w)
+    echo -e "\n${txtgrn}✓ Added ${selected_count} theme(s) to ${THEMES_CONFIG_FILE}${txtrst}"
+    echo -e "${txtgrn}✓ Run: ddev exec grunt themes${txtrst}\n"
+}

@@ -1,0 +1,38 @@
+#!/bin/bash
+#ddev-generated - Do not modify this file; your modifications will be overwritten.
+
+## Description: Run grunt commands and theme management
+## Usage: grunt [command]
+## Example: "ddev grunt init"
+## Aliases: g
+## ExecRaw: true
+## HostWorkingDir: false
+
+if [[ -z "${DDEV_PROJECT}" ]]; then
+    echo -e "\nError: This script must be run inside DDEV\n"
+    exit 1
+fi
+
+# Source components
+source ".ddev/commands/web/components/variables"
+source ".ddev/commands/web/components/functions"
+source ".ddev/commands/web/components/themes"
+source ".ddev/commands/web/components/init"
+source ".ddev/commands/web/components/help"
+
+echo -e "${bldblu}DDEV Grunt/BrowserSync for Magento ${WOODOO_VERSION}${txtrst}"
+
+case "$1" in
+    init|install|i)
+        init_grunt_themes
+        ;;
+    themes|theme)
+        list_themes_in_config
+        ;;
+    help|-h|--help)
+        show_help
+        ;;
+    *)
+        show_help
+        ;;
+esac

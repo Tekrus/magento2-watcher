@@ -1,48 +1,136 @@
-[![add-on registry](https://img.shields.io/badge/DDEV-Add--on_Registry-blue)](https://addons.ddev.com)
-[![tests](https://github.com/Tekrus/magento2-watcher/actions/workflows/tests.yml/badge.svg?branch=main)](https://github.com/Tekrus/magento2-watcher/actions/workflows/tests.yml?query=branch%3Amain)
-[![last commit](https://img.shields.io/github/last-commit/Tekrus/magento2-watcher)](https://github.com/Tekrus/magento2-watcher/commits)
-[![release](https://img.shields.io/github/v/release/Tekrus/magento2-watcher)](https://github.com/Tekrus/magento2-watcher/releases/latest)
+# ddev-grunt-browsersync
 
-# DDEV Magento2 Watcher
+Ddev addon for Magento 2 development with Grunt and BrowserSync live reload.
 
-## Overview
+## Features
 
-This add-on integrates Magento2 Watcher into your [DDEV](https://ddev.com/) project.
+- BrowserSync for automatic browser reloading
+- Grunt watch for LESS/CSS compilation
+- **Interactive theme selection** - auto-detects themes from Magento database
+- Livereload integration with Magento 2
 
 ## Installation
 
 ```bash
-ddev add-on get Tekrus/magento2-watcher
+ddev addon authorize
+ddev get wexo/mcemballage/ddev-grunt-browsersync
 ddev restart
 ```
 
-After installation, make sure to commit the `.ddev` directory to version control.
-
-## Usage
-
-| Command | Description |
-| ------- | ----------- |
-| `ddev describe` | View service status and used ports for Magento2 Watcher |
-| `ddev logs -s magento2-watcher` | Check Magento2 Watcher logs |
-
-## Advanced Customization
-
-To change the Docker image:
+## Quick Start
 
 ```bash
-ddev dotenv set .ddev/.env.magento2-watcher --magento2-watcher-docker-image="ddev/ddev-utilities:latest"
-ddev add-on get Tekrus/magento2-watcher
-ddev restart
+# 1. Initialize themes (interactive selection from database)
+ddev grunt init
+
+# 2. Install npm dependencies
+ddev exec npm install
+
+# 3. Register themes with Grunt
+ddev exec grunt themes
+
+# 4. Start BrowserSync + Grunt watch
+ddev browsersync
 ```
 
-Make sure to commit the `.ddev/.env.magento2-watcher` file to version control.
+## Interactive Theme Setup
 
-All customization options (use with caution):
+Run `ddev grunt init` to:
 
-| Variable | Flag | Default |
-| -------- | ---- | ------- |
-| `MAGENTO2_WATCHER_DOCKER_IMAGE` | `--magento2-watcher-docker-image` | `ddev/ddev-utilities:latest` |
+1. Query Magento database for installed themes
+2. Display interactive selection menu (use space to select, enter to confirm)
+3. Enter theme path for each selected theme
+4. Enter locale for each selected theme
+5. Generate `grunt-local-themes.js` automatically
 
-## Credits
+```bash
+$ ddev grunt init
+Found 3 themes in your database.
 
-**Contributed and maintained by [@Tekrus](https://github.com/Tekrus)**
+Select themes to add (use space to select):
+[✓] Vendor/theme-default
+[ ] Vendor/theme-custom
+[ ] Hyva/theme-alpine
+
+Theme path (Vendor/theme-default): app/design/frontend/Vendor/theme-default
+Locale for Vendor/theme-default: en_US
+```
+
+## Commands
+
+| Command | Description |
+|---------|-------------|
+| `ddev grunt init` | Interactive theme setup (select from DB) |
+| `ddev grunt themes` | List configured themes |
+| `ddev browsersync` | Start BrowserSync + Grunt watch |
+
+## Configuration Files
+
+| File | Purpose |
+|------|---------|
+| `.ddev/config.browsersync.yaml` | Port exposure |
+| `.ddev/browser-sync.cjs` | BrowserSync settings |
+| `.ddev/commands/web/browsersync` | Ddev command |
+| `.ddev/commands/web/grunt` | Theme management command |
+| `.ddev/grunt-local-themes.js` | Auto-generated theme config |
+
+## NPM Dependencies
+
+Add to `package.json`:
+
+```json
+{
+  "devDependencies": {
+    "grunt": "~1.6.1",
+    "grunt-browser-sync": "~2.2.0",
+    "grunt-contrib-clean": "~2.0.1",
+    "grunt-contrib-cssmin": "~5.0.0",
+    "grunt-contrib-imagemin": "~4.0.0",
+    "grunt-contrib-jasmine": "~4.0.0",
+    "grunt-contrib-less": "~3.0.0",
+    "grunt-contrib-watch": "~1.1.0",
+    "grunt-eslint": "~24.3.0",
+    "grunt-exec": "~3.0.0",
+    "grunt-replace": "~2.0.2",
+    "grunt-styledocco": "~0.3.0",
+    "grunt-template-jasmine-requirejs": "~0.2.3",
+    "grunt-text-replace": "~0.4.0",
+    "load-grunt-config": "~4.0.1",
+    "time-grunt": "~2.0.0",
+    "underscore": "1.13.7"
+  }
+}
+```
+
+## Magento Base URLs
+
+**Important:** The unsecure base URL must be HTTP:
+
+```bash
+ddev exec php bin/magento config:set web/unsecure/base_url "http://${DDEV_HOSTNAME}/"
+ddev exec php bin/magento config:set web/secure/base_url "https://${DDEV_HOSTNAME}/"
+```
+
+## Troubleshooting
+
+**No themes found:**
+- Ensure Magento is installed: `ddev exec php bin/magento setup:install`
+- Clear Magento cache: `ddev exec php bin/magento cache:flush`
+
+**BrowserSync not connecting:**
+- Verify base URLs are HTTP (unsecure) / HTTPS (secure)
+- Check port 3000 exposure: `ddev config | grep browsersync`
+
+**CSS changes not appearing:**
+- Run: `ddev exec php bin/magento setup:static-content:deploy -f`
+- Clear cache: `ddev exec php bin/magento cache:flush`
+
+## Uninstallation
+
+```bash
+ddev restart
+# Remove created files manually:
+# - .ddev/grunt-local-themes.js
+# - .ddev/commands/web/grunt
+# - .ddev/commands/web/components/
+```

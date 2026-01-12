@@ -2,21 +2,11 @@
 
 # Bats is a testing framework for Bash
 # Documentation https://bats-core.readthedocs.io/en/stable/
-# Bats libraries documentation https://github.com/ztombol/bats-docs
-
-# For local tests, install bats-core, bats-assert, bats-file, bats-support
-# And run this in the add-on root directory:
-#   bats ./tests/test.bats
-# To exclude release tests:
-#   bats ./tests/test.bats --filter-tags '!release'
-# For debugging:
-#   bats ./tests/test.bats --show-output-of-passing-tests --verbose-run --print-output-on-failure
 
 setup() {
   set -eu -o pipefail
 
-  # Override this variable for your add-on:
-  export GITHUB_REPO=Tekrus/magento2-watcher
+  export GITHUB_REPO=wexo/mcemballage/ddev-grunt-browsersync
 
   TEST_BREW_PREFIX="$(brew --prefix 2>/dev/null || true)"
   export BATS_LIB_PATH="${BATS_LIB_PATH}:${TEST_BREW_PREFIX}/lib:/usr/lib/bats"
@@ -39,24 +29,31 @@ setup() {
 }
 
 health_checks() {
-  # Do something useful here that verifies the add-on
-
-  # You can check for specific information in headers:
-  # run curl -sfI https://${PROJNAME}.ddev.site
-  # assert_output --partial "HTTP/2 200"
-  # assert_output --partial "test_header"
-
-  # Or check if some command gives expected output:
-  DDEV_DEBUG=true run ddev launch
+  # Verify browsersync command exists
+  run ddev browsersync --help
   assert_success
-  assert_output --partial "FULLURL https://${PROJNAME}.ddev.site"
+
+  # Verify grunt command exists  
+  run ddev grunt --help
+  assert_success
+
+  # Verify config files exist
+  run test -f "${DDEV_APPROOT}/.ddev/config.browsersync.yaml"
+  assert_success
+
+  run test -f "${DDEV_APPROOT}/.ddev/browser-sync.cjs"
+  assert_success
+
+  run test -f "${DDEV_APPROOT}/.ddev/commands/web/browsersync"
+  assert_success
+
+  run test -f "${DDEV_APPROOT}/.ddev/commands/web/grunt"
+  assert_success
 }
 
 teardown() {
   set -eu -o pipefail
   ddev delete -Oy "${PROJNAME}" >/dev/null 2>&1
-  # Persist TESTDIR if running inside GitHub Actions. Useful for uploading test result artifacts
-  # See example at https://github.com/ddev/github-action-add-on-test#preserving-artifacts
   if [ -n "${GITHUB_ENV:-}" ]; then
     [ -e "${GITHUB_ENV:-}" ] && echo "TESTDIR=${HOME}/tmp/${PROJNAME}" >> "${GITHUB_ENV}"
   else
@@ -66,7 +63,7 @@ teardown() {
 
 @test "install from directory" {
   set -eu -o pipefail
-  echo "# ddev add-on get ${DIR} with project ${PROJNAME} in $(pwd)" >&3
+  echo "# ddev add-on get ${DIR}" >&3
   run ddev add-on get "${DIR}"
   assert_success
   run ddev restart -y
@@ -77,7 +74,7 @@ teardown() {
 # bats test_tags=release
 @test "install from release" {
   set -eu -o pipefail
-  echo "# ddev add-on get ${GITHUB_REPO} with project ${PROJNAME} in $(pwd)" >&3
+  echo "# ddev add-on get ${GITHUB_REPO}" >&3
   run ddev add-on get "${GITHUB_REPO}"
   assert_success
   run ddev restart -y

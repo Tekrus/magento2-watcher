@@ -1,0 +1,69 @@
+#!/bin/bash
+#ddev-generated - Do not modify this file; your modifications will be overwritten.
+
+# Get themes from Magento database
+function get_themes_from_db() {
+    check_mysql
+
+    local theme_query=$(mysql -N -e "SELECT code FROM theme" 2>/dev/null)
+    echo "${theme_query}"
+}
+
+# Parse existing config to get already selected themes
+function get_existing_themes() {
+    if [[ -f "${THEMES_CONFIG_FILE}" ]]; then
+        grep -E "^\s+'[A-Za-z]+/[^']+':" "${THEMES_CONFIG_FILE}" | sed "s/\s*'\([^']*\)':.*/\1/" | tr '\n' ' '
+    fi
+}
+
+# Check if a theme is already in config
+function theme_in_config() {
+    local theme_code="$1"
+    grep -q "'${theme_code}':" "${THEMES_CONFIG_FILE}" 2>/dev/null
+}
+
+# Add or update theme in config
+function update_theme_in_config() {
+    local theme_code="$1"
+    local theme_path="$2"
+    local theme_area="$3"
+    local theme_locale="$4"
+
+    if theme_in_config "${theme_code}"; then
+        # Theme exists, update it (simple approach: regenerate entire config)
+        :
+    else
+        # Add new theme entry
+        echo "    '${theme_code}': {
+        area: '${theme_area}',
+        name: '${theme_code}',
+        locale: '${theme_locale}',
+        files: [
+            'css/styles-m',
+            'css/styles-l'
+        ],
+        dsl: 'less'
+    }," >> "${THEMES_CONFIG_FILE}"
+    fi
+}
+
+# List themes currently in config
+function list_themes_in_config() {
+    if [[ ! -f "${THEMES_CONFIG_FILE}" ]]; then
+        echo -e "\n${txtred}No ${THEMES_CONFIG_FILE} found.${txtrst}"
+        echo -e "${txtgrn}Run: ddev grunt init${txtrst}\n"
+        exit 1
+    fi
+
+    echo -e "\n${txtgrn}Themes configured:${txtrst}\n"
+
+    local existing_themes=$(get_existing_themes)
+    if [[ -n "${existing_themes}" ]]; then
+        for theme in ${existing_themes}; do
+            echo -e "${txtpur}- ${theme}${txtrst}"
+        done
+    else
+        echo -e "${txtylw}No themes configured yet.${txtrst}"
+    fi
+    echo ""
+}
