@@ -1,10 +1,52 @@
 #!/bin/bash
 #ddev-generated - Do not modify this file; your modifications will be overwritten.
 
+function setup_npm_packages() {
+    if [[ ! -f "package.json" ]]; then
+        echo -e "\n${txtcyn}Creating package.json with Grunt and BrowserSync packages...${txtrst}"
+        cat > package.json << 'PKGEOF'
+{
+  "devDependencies": {
+    "grunt": "~1.6.1",
+    "grunt-browser-sync": "~2.2.0",
+    "grunt-contrib-clean": "~2.0.1",
+    "grunt-contrib-cssmin": "~5.0.0",
+    "grunt-contrib-imagemin": "~4.0.0",
+    "grunt-contrib-jasmine": "~4.0.0",
+    "grunt-contrib-less": "~3.0.0",
+    "grunt-contrib-watch": "~1.1.0",
+    "grunt-eslint": "~24.3.0",
+    "grunt-exec": "~3.0.0",
+    "grunt-replace": "~2.0.2",
+    "grunt-styledocco": "~0.3.0",
+    "grunt-template-jasmine-requirejs": "~0.2.3",
+    "grunt-text-replace": "~0.4.0",
+    "load-grunt-config": "~4.0.1",
+    "time-grunt": "~2.0.0",
+    "underscore": "1.13.7"
+  }
+}
+PKGEOF
+        echo -e "${txtgrn}✓ Created package.json${txtrst}"
+    else
+        echo -e "\n${txtcyn}package.json already exists${txtrst}"
+    fi
+
+    echo -e "${txtcyn}Installing npm packages...${txtrst}"
+    if ddev exec npm install; then
+        echo -e "${txtgrn}✓ npm packages installed successfully${txtrst}"
+    else
+        echo -e "${txtred}✗ Failed to install npm packages${txtrst}"
+        exit 1
+    fi
+}
+
 # Initialize themes from database with interactive selection
 function init_grunt_themes() {
     check_gum
     check_mysql
+
+    setup_npm_packages
 
     local db_themes=$(get_themes_from_db)
     local db_theme_count=$(echo "${db_themes}" | wc -w)
@@ -102,5 +144,6 @@ function init_grunt_themes() {
 
     local selected_count=$(echo "${selected_themes}" | wc -w)
     echo -e "\n${txtgrn}✓ Added ${selected_count} theme(s) to ${THEMES_CONFIG_FILE}${txtrst}"
+    echo -e "${txtgrn}✓ npm packages installed${txtrst}"
     echo -e "${txtgrn}✓ Run: ddev exec grunt themes${txtrst}\n"
 }
