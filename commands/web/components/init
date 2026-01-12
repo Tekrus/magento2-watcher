@@ -100,9 +100,6 @@ function init_grunt_themes() {
     echo "Generating ${THEMES_CONFIG_FILE}..."
     generate_grunt_config "${config_content}"
 
-    echo -e "${txtcyn}Registering themes with Grunt...${txtrst}"
-    ddev exec grunt themes
-
     local selected_count=$(echo "${selected_themes}" | wc -w)
     echo -e "\n${txtgrn}✓ Added ${selected_count} theme(s) to ${THEMES_CONFIG_FILE}${txtrst}"
     echo -e "${txtgrn}✓ Run: ddev grunt watch${txtrst}\n"

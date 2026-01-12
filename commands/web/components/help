@@ -24,6 +24,9 @@ ${txtgrn}First Time Setup:${txtrst}
   2. ddev grunt init
   3. ddev grunt watch
 
+${txtgrn}Note:${txtrst} npm packages are installed automatically when running 'grunt watch'
+       if package.json is missing or packages need to be added.
+
 ${txtgrn}Files:${txtrst}
   .ddev/grunt/grunt-local-themes.js  # Theme configuration
 
