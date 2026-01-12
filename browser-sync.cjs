@@ -1,3 +1,4 @@
+// #ddev-generated
 // Browser-sync configuration for Magento 2 with Grunt
 let docroot = process.env.DDEV_DOCROOT;
 let filesdir = process.env.DDEV_FILES_DIR;
