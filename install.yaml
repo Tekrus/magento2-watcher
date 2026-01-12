@@ -1,7 +1,7 @@
 name: magento2-watcher
 
 project_files:
-  - web-build/Dockerfile.magento2-watcher
+  - web-build/Dockerfile
   - commands/web/browsersync
   - commands/web/grunt
   - commands/web/components/variables
@@ -11,9 +11,9 @@ project_files:
   - commands/web/components/help
   - config.browsersync.yaml
   - browser-sync.cjs
-  - Gruntfile.js
-  - grunt-local-themes.js
-  - grunt-config.json
+  - grunt/Gruntfile.js
+  - grunt/grunt-local-themes.js
+  - grunt/grunt-config.json
 
 ddev_version_constraint: '>= v1.23.4'
 

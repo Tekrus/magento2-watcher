@@ -22,13 +22,7 @@ ddev restart
 # 1. Initialize themes (interactive selection from database)
 ddev grunt init
 
-# 2. Install npm dependencies
-ddev exec npm install
-
-# 3. Register themes with Grunt
-ddev exec grunt themes
-
-# 4. Start BrowserSync + Grunt watch
+# 2. Start BrowserSync + Grunt watch
 ddev browsersync
 ```
 
@@ -62,44 +56,6 @@ Locale for Vendor/theme-default: en_US
 | `ddev grunt init` | Interactive theme setup (select from DB) |
 | `ddev grunt themes` | List configured themes |
 | `ddev browsersync` | Start BrowserSync + Grunt watch |
-
-## Configuration Files
-
-| File | Purpose |
-|------|---------|
-| `.ddev/config.browsersync.yaml` | Port exposure |
-| `.ddev/browser-sync.cjs` | BrowserSync settings |
-| `.ddev/commands/web/browsersync` | Ddev command |
-| `.ddev/commands/web/grunt` | Theme management command |
-| `.ddev/grunt-local-themes.js` | Auto-generated theme config |
-
-## NPM Dependencies
-
-Add to `package.json`:
-
-```json
-{
-  "devDependencies": {
-    "grunt": "~1.6.1",
-    "grunt-browser-sync": "~2.2.0",
-    "grunt-contrib-clean": "~2.0.1",
-    "grunt-contrib-cssmin": "~5.0.0",
-    "grunt-contrib-imagemin": "~4.0.0",
-    "grunt-contrib-jasmine": "~4.0.0",
-    "grunt-contrib-less": "~3.0.0",
-    "grunt-contrib-watch": "~1.1.0",
-    "grunt-eslint": "~24.3.0",
-    "grunt-exec": "~3.0.0",
-    "grunt-replace": "~2.0.2",
-    "grunt-styledocco": "~0.3.0",
-    "grunt-template-jasmine-requirejs": "~0.2.3",
-    "grunt-text-replace": "~0.4.0",
-    "load-grunt-config": "~4.0.1",
-    "time-grunt": "~2.0.0",
-    "underscore": "1.13.7"
-  }
-}
-```
 
 ## Magento Base URLs
 

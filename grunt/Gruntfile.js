@@ -9,24 +9,45 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-browser-sync');
     var _ = require('underscore'),
         path = require('path'),
-        filesRouter = require('./dev/tools/grunt/tools/files-router'),
-        configDir = './dev/tools/grunt/configs',
-        tasks = grunt.file.expand('./dev/tools/grunt/tasks/*'),
+        filesRouter,
+        configDir = __dirname,
+        tasks,
         themes;
 
-    filesRouter.set('themes', 'dev/tools/grunt/configs/themes');
-    themes = filesRouter.get('themes');
+    try {
+        filesRouter = require('./dev/tools/grunt/tools/files-router');
+        filesRouter.set('themes', 'dev/tools/grunt/configs/themes');
+        themes = filesRouter.get('themes');
+    } catch (e) {
+        themes = {};
+    }
 
-    tasks = _.map(tasks, function (task) {
-        return task.replace('.js', '');
-    });
-    tasks.push('time-grunt');
-    tasks.forEach(function (task) {
-        require(task)(grunt);
-    });
+    var gruntConfig = require('./grunt-config.json');
+    if (gruntConfig.themes && gruntConfig.themes !== 'grunt-local-themes') {
+        var localThemes = require('./' + gruntConfig.themes + '.js');
+        _.extend(themes, localThemes);
+    } else {
+        try {
+            var localThemes = require('./grunt-local-themes.js');
+            _.extend(themes, localThemes);
+        } catch (e) {
+        }
+    }
+
+    try {
+        tasks = grunt.file.expand('./dev/tools/grunt/tasks/*');
+        tasks = _.map(tasks, function (task) {
+            return task.replace('.js', '');
+        });
+        tasks.push('time-grunt');
+        tasks.forEach(function (task) {
+            require(task)(grunt);
+        });
+    } catch (e) {
+    }
 
     require('load-grunt-config')(grunt, {
-        configPath: path.join(__dirname, configDir),
+        configPath: path.join(__dirname, 'grunt-local-themes.js'),
         init: true,
         jitGrunt: {
             staticMappings: {
@@ -83,11 +104,15 @@ module.exports = function (grunt) {
         ],
 
         spec: function (theme) {
-            var runner = require('./dev/tests/js/jasmine/spec_runner');
+            var runner;
 
-            runner.init(grunt, { theme: theme });
-
-            grunt.task.run(runner.getTasks());
+            try {
+                runner = require('./dev/tests/js/jasmine/spec_runner');
+                runner.init(grunt, { theme: theme });
+                grunt.task.run(runner.getTasks());
+            } catch (e) {
+                grunt.log.writeln('Spec runner not available');
+            }
         }
     }, function (task, name) {
         grunt.registerTask(name, task);

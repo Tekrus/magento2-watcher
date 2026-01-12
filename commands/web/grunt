@@ -20,7 +20,7 @@ source ".ddev/commands/web/components/themes"
 source ".ddev/commands/web/components/init"
 source ".ddev/commands/web/components/help"
 
-echo -e "${bldblu}DDEV Grunt/BrowserSync for Magento ${WOODOO_VERSION}${txtrst}"
+echo -e "${bldblu}DDEV Grunt/BrowserSync for Magento ${txtrst}"
 
 case "$1" in
     init|install|i)
