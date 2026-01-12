@@ -2,7 +2,6 @@ name: magento2-watcher
 
 project_files:
   - web-build/Dockerfile.magento2-watcher
-  - commands/web/browsersync
   - commands/web/grunt
   - commands/web/components/variables
   - commands/web/components/functions

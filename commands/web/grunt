@@ -29,6 +29,13 @@ case "$1" in
     themes|theme)
         list_themes_in_config
         ;;
+    watch)
+        echo "Proxying Browsersync on $(echo ${DDEV_PRIMARY_URL} | sed -E 's/:[0-9]+//'):3000"
+        browser-sync start -c /var/www/html/.ddev/browser-sync.cjs & BROWSERSYNC_PID=$!
+        grunt --gruntfile /var/www/html/.ddev/grunt/Gruntfile.js watch & WATCH_PID=$!
+        trap "kill $BROWSERSYNC_PID $WATCH_PID 2>/dev/null" EXIT
+        wait
+        ;;
     help|-h|--help)
         show_help
         ;;
