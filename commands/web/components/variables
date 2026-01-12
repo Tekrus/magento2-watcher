@@ -22,4 +22,4 @@ GRUNT_VERSION="1.0.0"
 LATEST_GRUNT_VERSION="1.0.0"
 
 # Config file
-THEMES_CONFIG_FILE=".ddev/grunt-local-themes.js"
+THEMES_CONFIG_FILE=".ddev/grunt/grunt-local-themes.js"

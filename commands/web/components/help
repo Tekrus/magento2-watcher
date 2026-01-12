@@ -28,7 +28,7 @@ ${txtgrn}Note:${txtrst} npm packages are installed automatically during 'grunt i
        if package.json is missing or packages need to be added.
 
 ${txtgrn}Files:${txtrst}
-  .ddev/grunt/grunt-local-themes.js  # Theme configuration
+  .ddev/grunt/grunt-local-themes.js    # Theme configuration
 
 ${txtgrn}Troubleshooting:${txtrst}
   - Ensure Magento is installed and themes are registered
