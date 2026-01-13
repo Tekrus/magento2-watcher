@@ -1,11 +1,13 @@
 #!/bin/bash
 #ddev-generated - Do not modify this file; your modifications will be overwritten.
 
-# Run watch command
 function run_grunt_watch() {
+    echo "###############################################################################"
     echo "Proxying Browsersync on $(echo ${DDEV_PRIMARY_URL} | sed -E 's/:[0-9]+//'):3000"
-    npx browser-sync start -c /var/www/html/.ddev/browser-sync.cjs & BROWSERSYNC_PID=$!
-    grunt --gruntfile /var/www/html/.ddev/grunt/Gruntfile.js watch & WATCH_PID=$!
-    trap "kill $BROWSERSYNC_PID $WATCH_PID 2>/dev/null" EXIT
-    wait
+    echo "Starting Grunt watch with BrowserSync integration..."
+    echo "###############################################################################"
+
+    grunt exec
+
+    grunt browserSync watch
 }

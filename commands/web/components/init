@@ -109,7 +109,9 @@ EOF
 
     # Move temp file to final location
     echo "Generating ${THEMES_CONFIG_FILE}..."
-    mv "${THEMES_CONFIG_FILE}.tmp" "${THEMES_CONFIG_FILE}"
+    mv "${THEMES_CONFIG_FILE}.tmp" "${THEMES_CONFIG_FILE_DEST}"
+    cp "${GRUNTFILE}" "${GRUNTFILE_DEST}"
+    cp "${GRUNT_CONFIG_FILE}" "${GRUNT_CONFIG_FILE_DEST}"
 
     local selected_count=$(echo "${selected_themes}" | wc -w)
     echo -e "\n${txtgrn}✓ Added ${selected_count} theme(s) to ${THEMES_CONFIG_FILE}${txtrst}"

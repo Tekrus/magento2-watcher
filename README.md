@@ -94,6 +94,7 @@ ddev exec php bin/magento config:set web/secure/base_url "https://${DDEV_HOSTNAM
 - Run: `ddev exec php bin/magento setup:static-content:deploy -f`
 - Clear cache: `ddev exec php bin/magento cache:flush`
 - Check Grunt output for compilation errors
+- Make sure merge and minify CSS is disabled
 
 ## How It Works
 

@@ -6,61 +6,97 @@
 
 module.exports = function (grunt) {
     'use strict';
-    grunt.loadNpmTasks('grunt-browser-sync');
+
     var _ = require('underscore'),
         path = require('path'),
-        filesRouter,
-        configDir = __dirname,
-        tasks,
+        filesRouter = require('./dev/tools/grunt/tools/files-router'),
+        configDir = './dev/tools/grunt/configs',
+        tasks = grunt.file.expand('./dev/tools/grunt/tasks/*'),
         themes;
 
-    try {
-        filesRouter = require('./dev/tools/grunt/tools/files-router');
-        filesRouter.set('themes', 'dev/tools/grunt/configs/themes');
-        themes = filesRouter.get('themes');
-    } catch (e) {
-        themes = {};
-    }
+    filesRouter.set('themes', 'dev/tools/grunt/configs/themes');
+    themes = filesRouter.get('themes');
 
-    var gruntConfig = require('./grunt-config.json');
-    if (gruntConfig.themes && gruntConfig.themes !== 'grunt-local-themes') {
-        var localThemes = require('./' + gruntConfig.themes + '.js');
-        _.extend(themes, localThemes);
-    } else {
-        try {
-            var localThemes = require('./grunt-local-themes.js');
-            _.extend(themes, localThemes);
-        } catch (e) {
-        }
-    }
-
-    try {
-        tasks = grunt.file.expand('./dev/tools/grunt/tasks/*');
-        tasks = _.map(tasks, function (task) {
-            return task.replace('.js', '');
-        });
-        tasks.push('time-grunt');
-        tasks.forEach(function (task) {
-            require(task)(grunt);
-        });
-    } catch (e) {
-    }
+    tasks = _.map(tasks, function (task) {
+        return task.replace('.js', '');
+    });
+    tasks.push('time-grunt');
+    tasks.forEach(function (task) {
+        require(task)(grunt);
+    });
 
     require('load-grunt-config')(grunt, {
-        configPath: path.join(__dirname, 'grunt-local-themes.js'),
+        configPath: path.join(__dirname, configDir),
         init: true,
         jitGrunt: {
             staticMappings: {
-                usebanner: 'grunt-banner'
+                usebanner: 'grunt-banner',
+                browserSync: 'grunt-browser-sync'
+            }
+        }
+    });
+
+    grunt.config.set('browserSync', {
+        bsFiles: {
+            src: [
+                'pub/static/frontend/**/*.css',
+                'pub/static/frontend/**/*.js'
+            ]
+        },
+        options: {
+            proxy: {
+                target: "http://web",
+                proxyReq: [
+                    function (proxyReq) {
+                        proxyReq.setHeader('Host', process.env.DDEV_HOSTNAME);
+                        proxyReq.setHeader('X-Forwarded-Proto', 'https');
+                        proxyReq.setHeader('X-Forwarded-Port', '443');
+                    }
+                ],
+                middleware: function (req, res, next) {
+                    res.setHeader('Access-Control-Allow-Origin', '*');
+                    next();
+                }
+            },
+            port: 3000,
+            open: false,
+            ui: false,
+            cors: true,
+            rewriteRules: [
+                {
+                    match: new RegExp(`${process.env.DDEV_HOSTNAME}/([^"']+)`, 'g'),
+                    replace: `${process.env.DDEV_HOSTNAME}:3000/$1`
+                },
+                {
+                    match: new RegExp(
+                        `(https?:\\\\u003A\\\\u002F\\\\u002F)?${process.env.DDEV_HOSTNAME.replace('.', '\\.')}(?:\\\\u002F|/)([^"'\\\\]+)`,
+                        'g'
+                    ),
+                    replace: `${process.env.DDEV_HOSTNAME}:3000/$2`
+                }
+            ],
+            watchTask: true,
+            injectChanges: true,
+            ghostMode: {
+                clicks: true,
+                forms: true,
+                scroll: true
             }
         }
     });
 
     _.each({
+        /**
+         * Assembling tasks.
+         * ToDo: define default tasks.
+         */
         default: function () {
             grunt.log.subhead('I\'m default task and at the moment I\'m empty, sorry :/');
         },
 
+        /**
+         * Production preparation task.
+         */
         prod: function (component) {
             var tasks = [
                 'less',
@@ -77,6 +113,9 @@ module.exports = function (grunt) {
             }
         },
 
+        /**
+         * Refresh themes.
+         */
         refresh: function () {
             var tasks = [
                 'clean',
@@ -88,6 +127,9 @@ module.exports = function (grunt) {
             grunt.task.run(tasks);
         },
 
+        /**
+         * Documentation
+         */
         documentation: [
             'replace:documentation',
             'less:documentation',
@@ -104,15 +146,11 @@ module.exports = function (grunt) {
         ],
 
         spec: function (theme) {
-            var runner;
+            var runner = require('./dev/tests/js/jasmine/spec_runner');
 
-            try {
-                runner = require('./dev/tests/js/jasmine/spec_runner');
-                runner.init(grunt, { theme: theme });
-                grunt.task.run(runner.getTasks());
-            } catch (e) {
-                grunt.log.writeln('Spec runner not available');
-            }
+            runner.init(grunt, { theme: theme });
+
+            grunt.task.run(runner.getTasks());
         }
     }, function (task, name) {
         grunt.registerTask(name, task);

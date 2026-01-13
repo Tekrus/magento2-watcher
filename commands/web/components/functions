@@ -51,9 +51,12 @@ function get_theme_path() {
 
 # Required npm packages
 REQUIRED_PACKAGES=(
+    "glob"
     "grunt"
-    "grunt-browser-sync"
+    "grunt-banner"
+    "grunt-continue"
     "grunt-contrib-clean"
+    "grunt-contrib-connect"
     "grunt-contrib-cssmin"
     "grunt-contrib-imagemin"
     "grunt-contrib-jasmine"
@@ -65,10 +68,19 @@ REQUIRED_PACKAGES=(
     "grunt-styledocco"
     "grunt-template-jasmine-requirejs"
     "grunt-text-replace"
+    "grunt-browser-sync"
+    "browser-sync"
+    "imagemin-svgo"
+    "less"
     "load-grunt-config"
+    "morgan"
+    "node-minify"
+    "path"
+    "serve-static"
+    "squirejs"
+    "strip-comments"
     "time-grunt"
     "underscore"
-    "browser-sync"
 )
 
 # Ensure npm packages are installed
@@ -80,9 +92,13 @@ function ensure_npm_packages() {
         cat > "${pkg_file}" << 'PKGEOF'
 {
   "devDependencies": {
+    "glob": "~11.0.0",
     "grunt": "~1.6.1",
+    "grunt-banner": "~0.6.0",
     "grunt-browser-sync": "~2.2.0",
+    "grunt-continue": "~0.1.0",
     "grunt-contrib-clean": "~2.0.1",
+    "grunt-contrib-connect": "~5.0.1",
     "grunt-contrib-cssmin": "~5.0.0",
     "grunt-contrib-imagemin": "~4.0.0",
     "grunt-contrib-jasmine": "~4.0.0",
@@ -94,7 +110,15 @@ function ensure_npm_packages() {
     "grunt-styledocco": "~0.3.0",
     "grunt-template-jasmine-requirejs": "~0.2.3",
     "grunt-text-replace": "~0.4.0",
+    "imagemin-svgo": "~9.0.0",
+    "less": "4.2.0",
     "load-grunt-config": "~4.0.1",
+    "morgan": "~1.10.0",
+    "node-minify": "~3.6.0",
+    "path": "~0.12.7",
+    "serve-static": "~1.16.2",
+    "squirejs": "~0.2.1",
+    "strip-comments": "~2.0.1",
     "time-grunt": "~2.0.0",
     "underscore": "1.13.7",
     "browser-sync": "~3.0.3"
@@ -121,9 +145,13 @@ const pkgFile = process.argv[2];
 const pkg = JSON.parse(fs.readFileSync(pkgFile, 'utf8'));
 const missing = JSON.parse(process.argv[3]);
 const versions = {
+    'glob': '~11.0.0',
     'grunt': '~1.6.1',
+    'grunt-banner': '~0.6.0',
     'grunt-browser-sync': '~2.2.0',
+    'grunt-continue': '~0.1.0',
     'grunt-contrib-clean': '~2.0.1',
+    'grunt-contrib-connect': '~5.0.1',
     'grunt-contrib-cssmin': '~5.0.0',
     'grunt-contrib-imagemin': '~4.0.0',
     'grunt-contrib-jasmine': '~4.0.0',
@@ -135,7 +163,15 @@ const versions = {
     'grunt-styledocco': '~0.3.0',
     'grunt-template-jasmine-requirejs': '~0.2.3',
     'grunt-text-replace': '~0.4.0',
+    'imagemin-svgo': '~9.0.0',
+    'less': '4.2.0',
     'load-grunt-config': '~4.0.1',
+    'morgan': '~1.10.0',
+    'node-minify': '~3.6.0',
+    'path': '~0.12.7',
+    'serve-static': '~1.16.2',
+    'squirejs': '~0.2.1',
+    'strip-comments': '~2.0.1',
     'time-grunt': '~2.0.0',
     'underscore': '1.13.7',
     'browser-sync': '~3.0.3'
