@@ -9,7 +9,6 @@ project_files:
   - commands/web/components/watch
   - commands/web/components/help
   - config.browsersync.yaml
-  - browser-sync.cjs
   - grunt/Gruntfile.js
   - grunt/grunt-local-themes.js
   - grunt/grunt-config.json
