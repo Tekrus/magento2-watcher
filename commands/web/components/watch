@@ -7,7 +7,7 @@ function run_grunt_watch() {
     echo "Starting Grunt watch with BrowserSync integration..."
     echo "###############################################################################"
 
-    grunt exec
+    npx grunt exec
 
-    grunt browserSync watch
+    npx grunt browserSync watch
 }
